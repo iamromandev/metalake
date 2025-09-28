@@ -7,15 +7,15 @@ build-backend = "hatchling.build"
 [project]
 name = "metalake"
 version = "0.0.0"
-description = "metalake to store any data"
+description = "Metalake to store any data"
 authors = [
     { name = "Roman", email = "iamromandev@gmail.com" },
 ]
 readme = "README.md"
-requires-python = "==3.13.5"
+requires-python = "==3.12.11"
 dependencies = [
     "loguru==0.7.3",
-    "fastapi[all]==0.115.12",
+    "fastapi[all]==0.117.1",
     "tortoise-orm[accel,aiomysql]==0.25.1",
     "aerich[toml,mysql]==0.9.1",
     "toml==0.10.2",
@@ -23,10 +23,10 @@ dependencies = [
 
 [dependency-groups]
 dev = [
-    "pre-commit==4.2.0",
-    "ruff==0.11.11",
-    "mypy==1.15.0",
-    "ty==0.0.1a6",
+    "pre-commit==4.3.0",
+    "ruff==0.13.2",
+    "mypy==1.18.2",
+    "ty==0.0.1a21",
 ]
 
 [tool.uv]

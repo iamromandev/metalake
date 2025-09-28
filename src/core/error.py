@@ -4,6 +4,7 @@ from typing import Annotated, Any
 
 from fastapi import FastAPI, Request
 from fastapi.encoders import jsonable_encoder
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from loguru import logger
 from pydantic import Field
@@ -135,6 +136,24 @@ class Error(Exception, BaseMixin):
         )
 
     @classmethod
+    def forbidden(
+        cls: type["Error"],
+        message: str | None = None,
+        details: list[str] | None = None,
+    ) -> "Error":
+        return cls(
+            code=Code.FORBIDDEN,
+            message=message,
+            type=ErrorType.FORBIDDEN,
+            details=[
+                ErrorDetail(
+                    description=d
+                )
+                for d in details
+            ] if details else None
+        )
+
+    @classmethod
     def conflict(
         cls: type["Error"],
         message: str | None = None,
@@ -176,6 +195,23 @@ class Error(Exception, BaseMixin):
             type=error_type,
         )
 
+    @classmethod
+    def process_validation_error(
+        cls: type["Error"],
+        exc: RequestValidationError
+    ) -> "Error":
+        messages = [
+            f"{'.'.join(str(loc) for loc in err['loc'])}: {err['msg']}"
+            for err in exc.errors()
+        ]
+        exception_message = "; ".join(messages) if messages else "Validation error"
+
+        return cls(
+            code=Code.UNPROCESSABLE_ENTITY,  # 422
+            message=exception_message,
+            type=ErrorType.VALIDATION_ERROR,
+        )
+
 
 def config_global_errors(app: FastAPI) -> None:
     @app.exception_handler(Exception)
@@ -190,6 +226,11 @@ def config_global_errors(app: FastAPI) -> None:
         gc.collect()
 
         return Error.process_exception(error).to_resp()
+
+    @app.exception_handler(RequestValidationError)
+    async def validation_exception_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
+        logger.warning(f"Validation error in {request.url}: {exc.errors()}")
+        return Error.process_validation_error(exc).to_resp()
 
     @app.exception_handler(Error)
     async def catch_error(request: Request, error: Error) -> JSONResponse:

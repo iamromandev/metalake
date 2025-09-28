@@ -2,13 +2,12 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from src.db import init_db, run_migrations
-from src.routes.crawl import crawl_router
 from src.routes.health import health_router
 
 from src.core.common import get_app_version
 from src.core.config import settings
 from src.core.error import config_global_errors
+from src.db import run_migrations
 
 
 @asynccontextmanager
@@ -34,12 +33,6 @@ app.add_middleware(
 )
 
 config_global_errors(app)
-init_db(app)
+#init_db(app)
 
 app.include_router(health_router)
-app.include_router(crawl_router)
-
-# if __name__ == "__main__":
-#     import uvicorn
-#
-#     uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
