@@ -1,7 +1,4 @@
 ### ignore ###
-.idea
-.env
-.env.**
 __pycache__
 uv.lock
 

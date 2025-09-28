@@ -1,0 +1,140 @@
+services:
+  db:
+    platform: linux/arm64
+    image: mariadb:10.6.22
+    hostname: db
+    container_name: db
+    restart: on-failure
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - db:/var/lib/mysql/data
+    networks:
+      - db
+    command: [ "mysqld", "--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci" ]
+    healthcheck:
+      test: mysqladmin ping -h 127.0.0.1 -u $$MYSQL_USER --password=$$MYSQL_PASSWORD
+      start_period: 3s
+      interval: 5s
+      timeout: 3s
+      retries: 3
+
+  cache:
+    platform: linux/amd64
+    image: redis:latest
+    hostname: cache
+    container_name: cache
+    restart: on-failure
+    ports:
+      - "6379:6379"
+    networks:
+      - cache
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      start_period: 3s
+      interval: 5s
+      timeout: 3s
+      retries: 3
+
+  #  playwright:
+  #    platform: linux/arm64
+  #    image: mcr.microsoft.com/playwright/python:v1.53.0-noble
+  #    hostname: playwright
+  #    container_name: playwright
+  #    restart: unless-stopped
+  #    ports:
+  #      - "9222:9222"
+  #    environment:
+  #      - PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+  #    networks:
+  #      - playwright
+  #      - server
+  #    command: >
+  #      bash -c "
+  #          pip install --upgrade pip &&
+  #          pip install --no-cache-dir playwright==1.53.0 &&
+  #          playwright install --with-deps chromium &&
+  #          python -c '
+  #              import sys
+  #              from playwright.sync_api import sync_playwright
+  #              with sync_playwright() as p:
+  #                  server = p.chromium.launch_server(port=9222)
+  #                  print(server.ws_endpoint)
+  #                  server.wait_for_exit()
+  #          '
+  #        "
+
+  server:
+    platform: linux/arm64
+    hostname: server
+    container_name: server
+    restart: unless-stopped
+    build:
+      context: .
+      dockerfile: dockerfile
+      target: local
+      args:
+        ENV: local
+        WORK_DIR: /workdir
+        INSTALL_DIR: /opt/install
+        PW_DIR: /pwdir
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/workdir
+    networks:
+      - db
+      - cache
+      - server
+      - backend
+    depends_on:
+      db:
+        condition: service_healthy
+      cache:
+        condition: service_healthy
+    command: >
+      bash -c "uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload"
+
+#  prometheus:
+#    platform: linux/arm64
+#    image: prom/prometheus:latest
+#    hostname: prometheus
+#    container_name: prometheus
+#    restart: unless-stopped
+#    ports:
+#      - 9090:9090
+#    volumes:
+#      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+#      - prometheus:/prometheus
+#    networks:
+#      - server
+#    depends_on:
+#      - server
+
+networks:
+  db:
+    name: db
+    driver: bridge
+  cache:
+    name: cache
+    driver: bridge
+#  playwright:
+#    name: playwright
+#    driver: bridge
+  server:
+    name: server
+    driver: bridge
+  backend:
+    name: backend
+    driver: bridge
+
+volumes:
+  db:
+    name: db-summary
+#  prometheus:
+#    name: prometheus-summary
