@@ -10,7 +10,7 @@ class Lake(Base):
     app: str = fields.CharField(max_length=255, index=True)
     dataset = fields.CharField(max_length=255, index=True)
     ref_id = fields.UUIDField(default=uuid.uuid4, unique=True, index=True)
-    meta: dict[str, Any] | list[None] | None = fields.JSONField(null=True)
+    meta: dict[str, Any] | list[Any] | None = fields.JSONField(null=True)
 
     class Meta:
         table = "lake"
