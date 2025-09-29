@@ -1,30 +1,54 @@
 services:
   db:
     platform: linux/arm64
-    image: mariadb:11.4.8
+    image: mariadb:latest
     hostname: db-metalake
     container_name: db-metalake
     restart: on-failure
     environment:
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${DB_NAME}
-      MYSQL_USER: ${DB_USER}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      MARIADB_DATABASE: ${DB_NAME}
+      MARIADB_USER: ${DB_USER}
+      MARIADB_PASSWORD: ${DB_PASSWORD}
     ports:
       - "3303:3306"
     volumes:
-      - db:/var/lib/mysql/data
+      - db:/var/lib/mysql
     networks:
       - db
     command:
       - --character-set-server=utf8mb4
       - --collation-server=utf8mb4_unicode_ci
     healthcheck:
-      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
-      start_period: 3s
+      test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
+      start_period: 10s
       interval: 5s
       timeout: 3s
       retries: 3
+
+  storage:
+    platform: linux/arm64
+    image: minio/minio:latest
+    hostname: storage-metalake
+    container_name: storage-metalake
+    restart: on-failure
+    environment:
+      MINIO_ROOT_USER: ${STORAGE_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${STORAGE_ROOT_PASSWORD}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - storage:/storage
+    networks:
+      - storage
+    command: server --console-address ":9001" /data
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+      start_period: 10s
 
   server:
     platform: linux/arm64
@@ -45,9 +69,12 @@ services:
       - .:/workdir
     networks:
       - db
+      - storage
       - server
     depends_on:
       db:
+        condition: service_healthy
+      storage:
         condition: service_healthy
     command: >
       bash -c "uvicorn src.main:app --host 0.0.0.0 --port 8000 --reload"
@@ -72,6 +99,9 @@ networks:
   db:
     name: db-metalake
     driver: bridge
+  storage:
+    name: storage-metalake
+    driver: bridge
   server:
     name: server-metalake
     driver: bridge
@@ -79,5 +109,7 @@ networks:
 volumes:
   db:
     name: db-metalake
+  storage:
+    name: storage-metalake
 #  prometheus:
 #    name: prometheus-summary

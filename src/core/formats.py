@@ -38,8 +38,11 @@ def serialize(obj: Any, instructions: dict[type, type] | None = None) -> Any:
     elif isinstance(obj, datetime | date | time):
         return obj.isoformat()
 
-    elif isinstance(obj, uuid.UUID | SecretStr):
+    elif isinstance(obj, uuid.UUID):
         return str(obj)
+
+    elif isinstance(obj, SecretStr):
+        return obj.get_secret_value()
 
     elif hasattr(obj, "__dict__"):
         # For ORM objects like Tortoise, SQLAlchemy, etc.

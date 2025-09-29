@@ -1,4 +1,5 @@
 import asyncio
+from urllib.parse import quote_plus
 
 from fastapi import FastAPI
 from loguru import logger
@@ -6,6 +7,7 @@ from tortoise import Tortoise
 from tortoise.contrib.fastapi import register_tortoise
 
 from src.core.config import settings
+from src.core.formats import serialize
 
 DB_CONFIG = {
     "connections": {
@@ -16,12 +18,12 @@ DB_CONFIG = {
                 "port": settings.db_port,
                 "database": settings.db_name,
                 "user": settings.db_user,
-                "password": settings.db_password,
+                "password": serialize(settings.db_password),
             }
         }
     },
     "apps": {
-        "model": {
+        "models": {
             "models": ["src.db.model"],
             "default_connection": "default",
         },

@@ -16,9 +16,10 @@ requires-python = "==3.13.5"
 dependencies = [
     "loguru==0.7.3",
     "fastapi[all]==0.117.1",
-    "tortoise-orm[accel,aiomysql]==0.25.1",
-    "aerich[toml,mysql]==0.9.1",
+    "tortoise-orm[accel,asyncmy]==0.25.1",
+    "aerich[toml,asyncmy]==0.9.1",
     "toml==0.10.2",
+    "minio==7.2.17",
 ]
 
 [dependency-groups]
