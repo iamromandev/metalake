@@ -10,7 +10,7 @@ async def upgrade(db: BaseDBAsyncClient) -> str:
     `deleted_at` DATETIME(6),
     `app` VARCHAR(255) NOT NULL,
     `dataset` VARCHAR(255) NOT NULL,
-    `ref_id` CHAR(36) NOT NULL UNIQUE,
+    `ref_id` CHAR(36) NOT NULL,
     `meta` JSON,
     UNIQUE KEY `uid_lake_app_7a0112` (`app`, `dataset`, `ref_id`),
     KEY `idx_lake_app_6a9c76` (`app`),

@@ -1,18 +1,19 @@
 # system
 .PHONY: clean-system
 clean-system:
-	docker system prune -a --force
+	docker system prune --all --force
+	docker volume prune --all --force
 	docker buildx prune --all --force
 	docker builder prune --all --force
 
+# project
 .PHONY: clean-db
 clean-db:
-	docker volume prune --all --force
+	docker compose down -v
 
 .PHONY: clean
 clean:
-	make clean-system
-	make clean-db
+	docker compose down -v --rmi all
 
 .PHONY: ps
 ps:

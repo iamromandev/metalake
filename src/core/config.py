@@ -24,6 +24,8 @@ class Settings(BaseSettings):
     # storage
     storage_root_user: Annotated[str, Field(description="Storage root user")]
     storage_root_password: Annotated[SecretStr, Field(description="Storage root password")]
+    # auth
+    api_key: Annotated[SecretStr, Field(description="Metalake api key")]
 
     model_config = SettingsConfigDict(
         env_file=".env",

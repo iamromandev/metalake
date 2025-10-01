@@ -8,8 +8,8 @@ from src.core.base import Base
 
 class Lake(Base):
     app: str = fields.CharField(max_length=255, index=True)
-    dataset = fields.CharField(max_length=255, index=True)
-    ref_id = fields.UUIDField(default=uuid.uuid4, unique=True, index=True)
+    dataset: str = fields.CharField(max_length=255, index=True)
+    ref_id: uuid.UUID = fields.UUIDField(default=uuid.uuid4, index=True)
     meta: dict[str, Any] | list[Any] | None = fields.JSONField(null=True)
 
     class Meta:

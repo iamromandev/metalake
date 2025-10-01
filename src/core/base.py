@@ -340,7 +340,7 @@ class BaseSchema(BaseModel):
 class BaseService:
 
     def __init__(self) -> None:
-        logger.debug(f"{self._tag}|__init__()")
+        pass
 
     @cached_property
     def _tag(self) -> str:
