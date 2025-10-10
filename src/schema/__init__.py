@@ -1,2 +1,2 @@
 from .health import HealthSchema
-from .lake import LakeCreateSchema, LakeOutSchema, LakeUpdateSchema
+from .lake import FileSchema, LakeCreateSchema, LakeOutSchema, LakeUpdateSchema

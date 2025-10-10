@@ -6,8 +6,9 @@ from fastapi import UploadFile
 from src.client import StorageClient
 from src.core.base import BaseService
 from src.core.error import Error
+from src.core.formats import serialize
 from src.repo import LakeRepo
-from src.schema import LakeOutSchema
+from src.schema import FileSchema, LakeOutSchema
 
 
 class LakeService(BaseService):
@@ -45,7 +46,13 @@ class LakeService(BaseService):
             app=app, dataset=dataset, ref_id=ref_id, meta=metadata
         )
         if file:
-            await self._storage_client.store(
+            file_schema: FileSchema = await self._storage_client.store(
                 file_key=db_lake.file_key(file),
                 file=file,
             )
+            db_lake = await self._lake_repo.update(
+                instance=db_lake,
+                meta=serialize(file_schema.safe_dump()),
+            )
+
+        return await LakeOutSchema.from_tortoise_orm(db_lake)

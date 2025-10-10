@@ -5,6 +5,8 @@ from fastapi import APIRouter, Depends, File, Form, UploadFile
 from fastapi.responses import JSONResponse
 from loguru import logger
 
+from src.core.success import Success
+from src.schema import LakeOutSchema
 from src.service import LakeService, get_lake_service
 from src.service.auth import require_auth_key
 
@@ -26,18 +28,15 @@ async def create(
     file: Annotated[UploadFile | None, File(...)] = None,
 ) -> JSONResponse:
     logger.debug(f"{_tag()}| app: {app}, dataset: {dataset}, ref_id: {ref_id}, meta: {meta}, file: {file}")
-    await service.create(
+    data: LakeOutSchema = await service.create(
         app=app,
         dataset=dataset,
         ref_id=ref_id,
         meta=meta,
         file=file,
     )
-    pass
-    # output: CollectionOutSchema = await service.create_data(
-    #      user=user, payload=payload
-    # )
-    # return Success.created(
-    #     message="Collection created successfully.",
-    #     data=output
-    # ).to_resp()
+ 
+    return Success.created(
+        message="Lake entry created successfully.",
+        data=data
+    ).to_resp()

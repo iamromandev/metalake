@@ -1,5 +1,5 @@
 import uuid
-from collections.abc import Iterable, Sequence
+from collections.abc import Callable, Iterable, Sequence
 from datetime import UTC, datetime
 from functools import cached_property
 from typing import Annotated, Any, Generic, TypeVar
@@ -307,12 +307,14 @@ class BaseSchema(BaseModel):
         exclude_fields: Annotated[set[str] | None, Field(...)] = None,
         exclude_none: Annotated[bool, Field(...)] = None,
         exclude_unset: Annotated[bool, Field(...)] = None,
+        fallback: Callable[[Any], Any] | None = None,
     ) -> dict[str, Any]:
         data = self.model_dump(
             include=include_fields,
             exclude=exclude_fields,
             exclude_none=exclude_none,
-            exclude_unset=exclude_unset
+            exclude_unset=exclude_unset,
+            fallback=fallback
         )
         logger.info(f"{self._tag}|to_dict(): {data}")
         return data
@@ -321,12 +323,14 @@ class BaseSchema(BaseModel):
         self,
         include_fields: Annotated[set[str] | None, Field(...)] = None,
         exclude_fields: Annotated[set[str] | None, Field(...)] = None,
+        fallback: Callable[[Any], Any] | None = None,
     ) -> dict[str, Any]:
         data = self.to_dict(
             include_fields=include_fields,
             exclude_fields=exclude_fields,
             exclude_none=True,
-            exclude_unset=True
+            exclude_unset=True,
+            fallback=fallback
         )
         logger.info(f"{self._tag}|to_dict(): {data}")
         return data
