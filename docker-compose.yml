@@ -71,6 +71,7 @@ services:
       - db
       - storage
       - server
+      - backend
     depends_on:
       db:
         condition: service_healthy
@@ -104,6 +105,9 @@ networks:
     driver: bridge
   server:
     name: server-metalake
+    driver: bridge
+  backend:
+    name: backend
     driver: bridge
 
 volumes:

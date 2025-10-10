@@ -1,0 +1,1 @@
+from .crud import router as lake_crud_router

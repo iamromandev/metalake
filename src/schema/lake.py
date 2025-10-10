@@ -8,7 +8,8 @@ from src.db.model import Lake
 _LakeCreateSchema = pydantic_model_creator(
     Lake,
     name="LakeCreate",
-    exclude_readonly=True
+    exclude_readonly=True,
+    exclude=("ref_id",)
 )
 
 

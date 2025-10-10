@@ -22,8 +22,12 @@ class Settings(BaseSettings):
     db_port: Annotated[int, Field(description="Database port")]
     db_name: Annotated[str, Field(description="Database name")]
     # storage
+    storage_endpoint: Annotated[str, Field(description="Storage endpoint")]
     storage_root_user: Annotated[str, Field(description="Storage root user")]
     storage_root_password: Annotated[SecretStr, Field(description="Storage root password")]
+    storage_secure: Annotated[bool, Field(description="Storage secure connection")]
+    storage_bucket: Annotated[str, Field(description="Storage bucket name")]
+    storage_chunk_size: Annotated[int, Field(description="Storage chunk size in bytes", default=5 * 1024 * 1024)]
     # auth
     api_key: Annotated[SecretStr, Field(description="Metalake api key")]
 

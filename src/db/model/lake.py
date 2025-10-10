@@ -1,6 +1,7 @@
 import uuid
 from typing import Any
 
+from fastapi import UploadFile
 from tortoise import fields
 
 from src.core.base import Base
@@ -20,3 +21,6 @@ class Lake(Base):
 
     def __str__(self) -> str:
         return f"[Lake: {self.app}, {self.dataset}, {self.ref_id}]"
+
+    def file_key(self, file: UploadFile) -> str:
+        return f"{self.app}/{self.dataset}/{self.ref_id}_{file.filename}"

@@ -8,6 +8,7 @@ from src.core.config import settings
 from src.core.error import config_global_errors
 from src.db import init_db, run_migrations
 from src.route.health import health_router
+from src.route.lake import lake_crud_router
 
 
 @asynccontextmanager
@@ -32,7 +33,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# error
 config_global_errors(app)
+# database
 init_db(app)
 
+# health check
 app.include_router(health_router)
+# lake crud
+app.include_router(lake_crud_router)
