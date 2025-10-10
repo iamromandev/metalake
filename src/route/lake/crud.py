@@ -35,7 +35,7 @@ async def create(
         meta=meta,
         file=file,
     )
- 
+    
     return Success.created(
         message="Lake entry created successfully.",
         data=data
